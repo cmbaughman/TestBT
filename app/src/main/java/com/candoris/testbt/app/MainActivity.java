@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,7 +20,6 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 
-
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG="TestBT MainActivity";
@@ -29,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
     private StringBuilder recDataString = new StringBuilder();
     private BluetoothDevice mDevice = null;
 
+    protected Handler mHandler;
     private ConnectThread mConnectThread = null;
 
     public TextView outp;
@@ -61,6 +63,22 @@ public class MainActivity extends ActionBarActivity {
 
         mConnectThread = new ConnectThread(mDevice);
         mConnectThread.start();
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                byte[] writeBuff = (byte[])msg.obj;
+                int begin = (int)msg.arg1;
+                int end = (int)msg.arg2;
+
+                switch (msg.what) {
+                    case 1:
+                        String writeMessage = new String(writeBuff);
+                        writeMessage = writeMessage.substring(begin, end);
+                        break;
+                }
+            }
+        };
     }
 
     private void checkBTState() {
@@ -179,13 +197,37 @@ public class MainActivity extends ActionBarActivity {
                     bytes += mmInStream.read(buffer, bytes, buffer.length - bytes);
                     for (int i = begin; i < bytes; i++) {
                         if (buffer[i] == Utils.msgStart) {
-
+                            mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
+                            begin = i+ 1;
+                            if (i == bytes -1) {
+                                bytes = 0;
+                                begin = 0;
+                            }
                         }
                     }
                 }
                 catch (IOException e) {
                     Log.e("TestBTConnectedThread", e.getMessage(), e);
+                    break;
                 }
+            }
+        }
+
+        public void write(byte[] bytes) {
+            try {
+                mmOutStream.write(bytes);
+            }
+            catch (IOException e) {
+                Log.e("TestBTConnectedThread", e.getMessage(), e);
+            }
+        }
+
+        public void cancel() {
+            try {
+                mmSocket.close();
+            }
+            catch (IOException e) {
+                Log.e("TestBTConnectedThread", e.getMessage(), e);
             }
         }
     }
