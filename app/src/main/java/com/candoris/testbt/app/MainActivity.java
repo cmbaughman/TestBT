@@ -61,8 +61,10 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        mConnectThread = new ConnectThread(mDevice);
-        mConnectThread.start();
+        if (mDevice != null) {
+            mConnectThread = new ConnectThread(mDevice);
+            mConnectThread.start();
+        }
 
         mHandler = new Handler() {
             @Override
