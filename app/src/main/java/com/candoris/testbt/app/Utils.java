@@ -16,10 +16,6 @@ public class Utils {
 
     public static final String TAG = "Utils";
 
-    public static final byte msgStart = (byte)0x02;
-    public static final byte msgEnd = (byte)0x03;
-
-
     public static void log(String message) {
         if (message != null)
             Log.i("Pulse", message);
