@@ -240,6 +240,11 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                             break;
                     }
                     break;
+                case MESSAGE_READ:
+                    byte[] readBuff = (byte[])msg.obj;
+                    outp.append("\n" + new String(readBuff));
+                    // Write handler for message formats, use functions in either Utils or Pulse class
+                    break;
                 case MESSAGE_WRITE:
                     byte[] writeBuff = (byte[])msg.obj;
                     btView.write(writeBuff, msg.arg1);

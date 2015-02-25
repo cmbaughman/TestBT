@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -299,7 +298,7 @@ public class BluetoothSerialService {
                 try {
                     bytes = mmInStream.read(buffer);
                     mTextView.append(buffer, bytes, buffer.length);
-                    Log.e(TAG, "RECEIVED: " + new String(buffer, StandardCharsets.US_ASCII));
+                    Log.e(TAG, "RECEIVED: " + new String(buffer));
                     /*
                     for (int i = begin; i < bytes; i++) {
                         if (buffer[i] == Pulse.msgStart) {
