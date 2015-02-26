@@ -288,17 +288,42 @@ public class BluetoothSerialService {
             mmOutStream = tmpOut;
         }
 
+        /*
+         *
+         */
         public void run() {
             Log.d(TAG, "BEGIN ConnectedThread");
-
-            byte[] buffer = new byte[1024];
+            StringBuilder stringBuilder = null;
+            byte[] buffer = new byte[4];
             int begin = 0;
             int bytes = 0;
             while (true) {
                 try {
                     bytes = mmInStream.read(buffer);
                     mTextView.append(buffer, bytes, buffer.length);
-                    Log.e(TAG, "RECEIVED: " + new String(buffer));
+                    Log.e(TAG, "RECEIVED RAW: " + buffer);
+                    Log.e(TAG, "RECEIVED var bytes: " + Utils.bytes2String(buffer, bytes));
+                    stringBuilder = new StringBuilder();
+
+                    for (int i=begin; i < bytes; i++) {
+                        stringBuilder.append(buffer[i]);
+                        stringBuilder.append(" ");
+                        switch (i) {
+                            case 1:
+                                mHandler.obtainMessage(MainActivity.MESSAGE_READ, 98, -1, buffer[i]).sendToTarget();
+                                break;
+                            case 2:
+                                mHandler.obtainMessage(MainActivity.MESSAGE_READ, 99, -1, buffer[i]).sendToTarget();
+                                break;
+                            default:
+                                Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
+                                break;
+                        }
+                    }
+
+                    Log.e(TAG, "RECEIVED parsed: " + stringBuilder.toString());
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    // 1 byte is 8 bits
                     /*
                     for (int i = begin; i < bytes; i++) {
                         if (buffer[i] == Pulse.msgStart) {
@@ -323,6 +348,7 @@ public class BluetoothSerialService {
         public void write(byte[] bytes) {
             try {
                 mmOutStream.write(bytes);
+                Log.e(TAG, "Calling write");
                 mHandler.obtainMessage(MainActivity.MESSAGE_WRITE, bytes.length, -1, bytes)
                         .sendToTarget();
             }

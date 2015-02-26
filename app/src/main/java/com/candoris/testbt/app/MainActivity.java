@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,6 +60,9 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     private static BluetoothSerialService mSerialService;
 
     public TextView outp;
+    public TextView outPulse;
+    public TextView outOx;
+    public TextView lblOx;
     public BTView btView;
 
     // SPP UUID service
@@ -76,24 +81,29 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
 
         outp = (TextView)findViewById(R.id.outp);
         btView = (BTView)findViewById(R.id.btView);
+        outPulse = (TextView)findViewById(R.id.outPulse);
+        outOx = (TextView)findViewById(R.id.outOx);
+        lblOx = (TextView)findViewById(R.id.lblOx);
+
         btView.initialize(this);
+        lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
+        outp.setMovementMethod(new ScrollingMovementMethod());
 
         checkBTState();
 
         btAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
+
         Log.e(TAG, pairedDevices.size() + " PAIRED FOUND ******************");
-        outp.append("\nConnected .....");
-        outp.append("\n" + pairedDevices.size() + " PAIRED FOUND ******************");
+        outp.append("\nConnecting .....");
+
         if (pairedDevices.size() > 0) {
             for(BluetoothDevice device : pairedDevices) {
-                Log.e(TAG, device.getName() + "******************");
-                outp.append("\n" + device.getName() + "******************");
-                outp.append("\n" + device.getAddress() + "******************");
-                Log.e(TAG, device.getAddress() + "******************");
+
+                Log.e(TAG, "Found " + device.getName() + " ***** " + device.getAddress());
+                outp.append("\nFound " + device.getName() + " ***** " + device.getAddress());
+
                 if (device.getName().contains(btname)) {
-                    Log.e(TAG, "Found " + address + " in onCreate()");
-                    outp.append("\n FOUND IT " + device.getAddress() + "******************");
                     mDevice = device;
                     break;
                 }
@@ -103,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
 
         if (mDevice != null) {
             Log.e(TAG, "DEVICE NOT NULL " + address + " in onCreate()");
-            outp.append("\n FOUND IT " + mDevice.getAddress() + "******************");
+            outp.append("\n Connecting to " + mDevice.getAddress() + "*****************");
             mSerialService = new BluetoothSerialService(this, mHandler, btView);
         }
     }
@@ -126,7 +136,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             if (mSerialService != null) {
                 if (mSerialService.getState() == BluetoothSerialService.STATE_NONE) {
                     mSerialService.start();
-                    Log.e(TAG, "STARTED SERVICE ");
+                    Log.d(TAG, "STARTED SERVICE ");
                     mSerialService.connect(mDevice);
                 }
             }
@@ -236,14 +246,26 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                         case BluetoothSerialService.STATE_LISTEN:
                         case BluetoothSerialService.STATE_NONE:
                             setTitle("Not Connected");
-
                             break;
                     }
                     break;
                 case MESSAGE_READ:
-                    byte[] readBuff = (byte[])msg.obj;
-                    outp.append("\n" + new String(readBuff));
-                    // Write handler for message formats, use functions in either Utils or Pulse class
+                    switch (msg.arg1) {
+                        case 98:
+                            outPulse.setText(msg.obj.toString());
+                            break;
+                        case 99:
+                            outOx.setText(msg.obj.toString());
+                            break;
+                        default:
+                            byte[] readBuff = (byte[])msg.obj;
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < msg.arg1; i++) {
+                                sb.append(readBuff[i]);
+                                sb.append(" ");
+                            }
+                            outp.append("\n" + sb.toString());
+                    }
                     break;
                 case MESSAGE_WRITE:
                     byte[] writeBuff = (byte[])msg.obj;

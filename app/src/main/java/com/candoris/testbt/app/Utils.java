@@ -38,6 +38,17 @@ public class Utils {
         return sb.toString();
     }
 
+    public static String bytes2String(byte[] b,  int count) {
+        StringBuilder ret = new StringBuilder();
+
+        for (int i=0; i < count; i++) {
+            String thaInt = Integer.toString((int)(b[i] & 0xFF));
+            ret.append(thaInt);
+        }
+
+        return ret.toString();
+    }
+
     public static byte[] toHex(String hex) {
         int len = hex.length();
         byte[] result = new byte[len];
