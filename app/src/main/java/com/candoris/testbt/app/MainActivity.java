@@ -250,22 +250,17 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                     }
                     break;
                 case MESSAGE_READ:
-                    switch (msg.arg1) {
-                        case 98:
-                            outPulse.setText(msg.obj.toString());
-                            break;
-                        case 99:
-                            outOx.setText(msg.obj.toString());
-                            break;
-                        default:
-                            byte[] readBuff = (byte[])msg.obj;
-                            StringBuilder sb = new StringBuilder();
-                            for (int i = 0; i < msg.arg1; i++) {
-                                sb.append(readBuff[i]);
-                                sb.append(" ");
-                            }
-                            outp.append("\n" + sb.toString());
+                    if (msg.arg1 == 8) {
+                        // Data Format #8
+                        OxRecord oxRecord = (OxRecord)msg.obj;
+                        outPulse.setText(oxRecord.getHeartRate());
+                        outOx.setText(oxRecord.getSpO2());
+                        outp.append("\n" + oxRecord.toString());
                     }
+                    else {
+                        Log.e(TAG, "MESSAGE_READ: " + msg.obj);
+                    }
+
                     break;
                 case MESSAGE_WRITE:
                     byte[] writeBuff = (byte[])msg.obj;

@@ -4,49 +4,50 @@ package com.candoris.testbt.app;
  * Created by cmb on 2/26/15.
  */
 public class OxRecord {
-    private int startByte;
-    private int statusByte;
-    private int plethByte;
-    private int floatByte;
-    private int chkByte;
+    private OxStatus status;
+    private String heartRate;
+    private String spO2;
+    private OxStatus status2;
 
-    public int getStartByte() {
-        return startByte;
+    public OxStatus getStatus() {
+        return status;
     }
 
-    public void setStartByte(int startByte) {
-        this.startByte = startByte;
+    public void setStatus(OxStatus status) {
+        this.status = status;
     }
 
-    public int getStatusByte() {
-        return statusByte;
+    public String getHeartRate() {
+        return heartRate;
     }
 
-    public void setStatusByte(int statusByte) {
-        this.statusByte = statusByte;
+    public void setHeartRate(String heartRate) {
+        this.heartRate = heartRate;
     }
 
-    public int getPlethByte() {
-        return plethByte;
+    public String getSpO2() {
+        return spO2;
     }
 
-    public void setPlethByte(int plethByte) {
-        this.plethByte = plethByte;
+    public void setSpO2(String spO2) {
+        this.spO2 = spO2;
     }
 
-    public int getFloatByte() {
-        return floatByte;
+    public OxStatus getStatus2() {
+        return status2;
     }
 
-    public void setFloatByte(int floatByte) {
-        this.floatByte = floatByte;
+    public void setStatus2(OxStatus status2) {
+        this.status2 = status2;
     }
 
-    public int getChkByte() {
-        return chkByte;
-    }
-
-    public void setChkByte(int chkByte) {
-        this.chkByte = chkByte;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Status: ").append(this.status.toString());
+        sb.append("Heart Rate: ").append(this.heartRate);
+        sb.append("SpO2: ").append(this.spO2);
+        sb.append("Status2: ").append(this.status2.toString());
+        return sb.toString();
     }
 }

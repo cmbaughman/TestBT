@@ -15,19 +15,23 @@ public class Pulse {
     public static final byte msgStart = (byte)0x02;
     public static final byte msgEnd = (byte)0x03;
 
-    /**
-     * Use this to get back a bitset representation of the byte,
-     * then access the specific bits with parseByte(b).get(2); or parseByte(b).get(3);
-     * for the 2nd and 3rd bits respectively.
-     * @param b byte
-     * @return java.util.BitSet
-     */
-    public static BitSet parseByte(byte b) {
-        BitSet bitSet = new BitSet(8);
-        for (int i=0; i < 8; i++) {
-            bitSet.set(i, (b & 1) == 1);
-            b >>= 1;
-        }
-        return bitSet;
+    public static OxStatus getOxStatus(BitSet bitSet) {
+        OxStatus oxStatus = new OxStatus();
+        oxStatus.resv = bitSet.get(6);
+        oxStatus.oot = bitSet.get(5);
+        oxStatus.lowPerfusion = bitSet.get(4);
+        oxStatus.marginalPerfusion = bitSet.get(3);
+        oxStatus.artf = bitSet.get(2);
+        return oxStatus;
     }
+
+    public static OxStatus getOxStatus2(BitSet bitSet) {
+        OxStatus oxStatus = new OxStatus();
+        oxStatus.resv = bitSet.get(6);
+        oxStatus.smartPointAlgo = bitSet.get(5);
+        oxStatus.sensorAlarm = bitSet.get(3);
+        oxStatus.lowBat = bitSet.get(0);
+        return oxStatus;
+    }
+
 }

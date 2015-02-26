@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.BitSet;
 import java.util.UUID;
 
 /**
@@ -294,6 +295,8 @@ public class BluetoothSerialService {
         public void run() {
             Log.d(TAG, "BEGIN ConnectedThread");
             StringBuilder stringBuilder = null;
+            BitSet bitSet = null;
+            OxRecord oxRecord = null;
             byte[] buffer = new byte[4];
             int begin = 0;
             int bytes = 0;
@@ -304,38 +307,38 @@ public class BluetoothSerialService {
                     Log.e(TAG, "RECEIVED RAW: " + buffer);
                     Log.e(TAG, "RECEIVED var bytes: " + Utils.bytes2String(buffer, bytes));
                     stringBuilder = new StringBuilder();
+                    oxRecord = new OxRecord();
 
                     for (int i=begin; i < bytes; i++) {
                         stringBuilder.append(buffer[i]);
                         stringBuilder.append(" ");
                         switch (i) {
+                            case 0:
+                                //Status
+                                bitSet = Utils.parseByte(buffer[i]);
+                                oxRecord.setStatus(Pulse.getOxStatus(bitSet));
+                                break;
                             case 1:
-                                mHandler.obtainMessage(MainActivity.MESSAGE_READ, 98, -1, buffer[i]).sendToTarget();
+                                // Pulse
+                                oxRecord.setHeartRate(Integer.toString(buffer[i]));
                                 break;
                             case 2:
-                                mHandler.obtainMessage(MainActivity.MESSAGE_READ, 99, -1, buffer[i]).sendToTarget();
+                                // SpO2
+                                oxRecord.setSpO2(Integer.toString(buffer[i]));
+                                break;
+                            case 3:
+                                // Status2
+                                bitSet = Utils.parseByte(buffer[i]);
+                                oxRecord.setStatus2(Pulse.getOxStatus2(bitSet));
                                 break;
                             default:
                                 Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
                                 break;
                         }
                     }
-
                     Log.e(TAG, "RECEIVED parsed: " + stringBuilder.toString());
-                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-                    // 1 byte is 8 bits
-                    /*
-                    for (int i = begin; i < bytes; i++) {
-                        if (buffer[i] == Pulse.msgStart) {
-                            mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
-                            begin = i+ 1;
-                            if (i == bytes -1) {
-                                bytes = 0;
-                                begin = 0;
-                            }
-                        }
-                    }
-                    */
+                    Log.e(TAG, "OxRecord: " + oxRecord.toString());
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, 8, -1, oxRecord).sendToTarget();
                 }
                 catch (IOException e) {
                     Log.e("TestBTConnectedThread", e.getMessage(), e);
