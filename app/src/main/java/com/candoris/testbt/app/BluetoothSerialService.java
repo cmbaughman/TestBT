@@ -344,6 +344,10 @@ public class BluetoothSerialService {
                                     break;
                             }
                         }
+
+                        if (bytes > 30) { // Device is in playback mode
+                            Log.e(TAG, Utils.bytes2String(buffer, bytes));
+                        }
                     }
 
                     // This is a quick hack i will fix when I get these into a new method

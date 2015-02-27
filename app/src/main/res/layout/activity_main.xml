@@ -67,11 +67,18 @@
             android:layout_below="@+id/btnSetDateTime"
             android:layout_marginTop="10dp"/>
 
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnPlayBack"
+            android:text="Get Patient Playback"
+            android:layout_below="@+id/btnGetModel"
+            android:layout_marginTop="10dp"/>
+
     <ScrollView
             android:id="@+id/scrollOutp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/btnGetModel">
+            android:layout_below="@+id/btnPlayBack">
 
         <TextView
                 android:id="@+id/outp"

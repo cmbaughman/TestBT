@@ -68,6 +68,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     public Button btnGetDateTime;
     public Button btnSetDateTime;
     public Button btnGetModel;
+    public Button btnPlayBack;
     public BTView btView;
 
     // SPP UUID service
@@ -92,6 +93,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         btnGetDateTime = (Button)findViewById(R.id.btnGetDateTime);
         btnSetDateTime = (Button)findViewById(R.id.btnSetDateTime);
         btnGetModel = (Button)findViewById(R.id.btnGetModel);
+        btnPlayBack = (Button)findViewById(R.id.btnPlayBack);
 
         btView.initialize(this);
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
@@ -146,6 +148,13 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             @Override
             public void onClick(View v) {
                 send(Pulse.CMDGETMODEL);
+            }
+        });
+
+        btnPlayBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                send(Pulse.CMDMPC.getBytes());
             }
         });
     }

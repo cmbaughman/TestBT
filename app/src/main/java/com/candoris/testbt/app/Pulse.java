@@ -20,6 +20,10 @@ public class Pulse {
     public static final byte ACK = (byte)0x06;
     public static final byte NAK = (byte)0x15;
 
+    // EOL CHARS ASCII
+    public static final char CR = (char)13;
+    public static final char LF = (char)10;
+
     // Retrieve Date Time from the 3150
     public static final byte[] CMDGETDATIME = { (byte)0x02, (byte)0x72, (byte)0x00, (byte)0x03 };
     // Set Date Time on the 3150
@@ -41,8 +45,12 @@ public class Pulse {
     // Enable ATR and set data format (DF13)
     public static final byte[] CMDSETCONFIG13 =
             { (byte)0x02, (byte)0x70,  (byte)0x04, (byte)0x02, (byte)0x0D, (byte)0x01, (byte)0x84, (byte)0x03};
-
+    // Get Model Version info from the 3150
     public static final byte[] CMDGETMODEL = { (byte)0x02, (byte)0x74, (byte)0x02, (byte)0x05, (byte)0x05, (byte)0x03 };
+    // Level 2 COMMANDS
+    // Memory playback
+    public static final String CMDMPC = "MPC?" + CR + LF;
+
 
     public static OxStatus getOxStatus(BitSet bitSet) {
         OxStatus oxStatus = new OxStatus();
