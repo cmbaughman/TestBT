@@ -16,13 +16,13 @@ public class OxStatus {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Artifact condition: ").append(this.artf);
-        stringBuilder.append("Out Of Track: ").append(this.oot);
-        stringBuilder.append("Low Perfusion: ").append(this.lowPerfusion);
-        stringBuilder.append("Marginal Perfustion: ").append(this.marginalPerfusion);
-        stringBuilder.append("Sensor Alarm: ").append(this.sensorAlarm);
-        stringBuilder.append("Smart Point Algorithm: ").append(this.smartPointAlgo);
-        stringBuilder.append("Low Battery: ").append(this.lowBat);
+        stringBuilder.append(" Artifact condition: ").append(this.artf);
+        stringBuilder.append(" Out Of Track: ").append(this.oot);
+        stringBuilder.append(" Low Perfusion: ").append(this.lowPerfusion);
+        stringBuilder.append(" Marginal Perfustion: ").append(this.marginalPerfusion);
+        stringBuilder.append(" Sensor Alarm: ").append(this.sensorAlarm);
+        stringBuilder.append(" Smart Point Algorithm: ").append(this.smartPointAlgo);
+        stringBuilder.append(" Low Battery: ").append(this.lowBat);
         return stringBuilder.toString();
     }
 }

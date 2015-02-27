@@ -51,13 +51,28 @@
             android:id="@+id/btnGetDateTime"
             android:text="Get Date From Oximeter"
             android:layout_below="@+id/lblOx"
-            android:layout_marginTop="50dp"/>
+            android:layout_marginTop="20dp"/>
+
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSetDateTime"
+            android:text="Set Date On Oximeter"
+            android:layout_below="@+id/btnGetDateTime"
+            android:layout_marginTop="10dp"/>
+
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnGetModel"
+            android:text="Get Oximeter model"
+            android:layout_below="@+id/btnSetDateTime"
+            android:layout_marginTop="10dp"/>
 
     <ScrollView
             android:id="@+id/scrollOutp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/btnGetDateTime">
+            android:layout_below="@+id/btnGetModel">
+
         <TextView
                 android:id="@+id/outp"
                 android:layout_width="wrap_content"

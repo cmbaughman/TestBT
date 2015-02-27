@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import com.google.common.io.ByteStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +37,7 @@ public class BluetoothSerialService {
     private ITextEvents listener;
     private Context mContext;
 
-    // Constants that indicate the current connection state
+    // Constants for WristOx2 Connection state machine
     public static final int STATE_NONE = 0;       // we're doing nothing
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
@@ -65,8 +64,7 @@ public class BluetoothSerialService {
         return mState;
     }
 
-    /**
-     * session in listening (server) mode. Called by the Activity onResume() */
+    // session in listening (server) mode. Called by the Activity onResume()
     public synchronized void start() {
         if (D) Log.d(TAG, "start");
 
@@ -97,7 +95,7 @@ public class BluetoothSerialService {
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
-        // Start the thread to connect with the given device
+        // Start the thread to connect with the device
         mConnectThread = new ConnectThread(device);
         mConnectThread.start();
         setState(STATE_CONNECTING);
@@ -153,7 +151,6 @@ public class BluetoothSerialService {
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
      */
     public void write(byte[] out) {
         // Create temporary object
@@ -168,7 +165,7 @@ public class BluetoothSerialService {
     }
 
     /**
-     * Indicate that the connection attempt failed and notify the UI Activity.
+     * Indicate that the connection attempt failed and notify the UI.
      */
     private void connectionFailed() {
         setState(STATE_NONE);
@@ -182,7 +179,7 @@ public class BluetoothSerialService {
     }
 
     /**
-     * Indicate that the connection was lost and notify the UI Activity.
+     * Indicate that the connection was lost and notify the UI.
      */
     private void connectionLost() {
         setState(STATE_NONE);
@@ -303,10 +300,8 @@ public class BluetoothSerialService {
             int bytes = 0;
             while (true) {
                 try {
-                    buffer = ByteStreams.toByteArray((mmInStream));
-
-                    Log.e(TAG, "RECEIVED length: " + buffer.length + " + Guava: " + buffer);
-                    Log.e(TAG, "RECEIVED var bytes: " + Utils.bytes2String(buffer, bytes));
+                    buffer = new byte[mmInStream.available()];
+                    bytes = mmInStream.read(buffer);
 
                     stringBuilder = new StringBuilder();
                     oxRecord = new OxRecord();
@@ -314,9 +309,13 @@ public class BluetoothSerialService {
                     for (int i=begin; i < bytes; i++) {
                         stringBuilder.append(buffer[i]);
                         stringBuilder.append(" ");
+                        Log.e(TAG, "Number of bytes received: " + bytes);
+                        if (bytes == 1) {
+                            Log.e(TAG, "1 bytes received " + buffer[i]);
+                        }
 
-                        if (bytes == 10) {
-                            Log.e(TAG, "********************** Got the 10 byte Date back! ******************");
+                        if (bytes == 2) {
+                            Log.e(TAG, "2 bytes received " + buffer[i]);
                         }
 
                         if (bytes == 4) {
@@ -346,11 +345,21 @@ public class BluetoothSerialService {
                             }
                         }
                     }
-                    Log.e(TAG, "RECEIVED parsed: " + stringBuilder.toString());
+
                     // This is a quick hack i will fix when I get these into a new method
                     if (bytes == 4) {
                         Log.e(TAG, "OxRecord: " + oxRecord.toString());
                         mHandler.obtainMessage(MainActivity.MESSAGE_READ, 8, -1, oxRecord).sendToTarget();
+                    }
+
+                    if (bytes == 10) {
+                        Log.e(TAG, "********************** Got the 10 byte Date back! ******************");
+                        Log.e(TAG, Utils.bytes2String(buffer, bytes));
+                    }
+
+                    if (bytes == 11) {
+                        Log.e(TAG, "********************** Got the 11 byte model back! ******************");
+                        Log.e(TAG, "*****Version Call returned " + Pulse.getVersion(buffer));
                     }
 
                 }

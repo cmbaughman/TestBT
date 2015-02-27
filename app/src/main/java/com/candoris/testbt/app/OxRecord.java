@@ -45,9 +45,9 @@ public class OxRecord {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Status: ").append(this.status.toString());
-        sb.append("Heart Rate: ").append(this.heartRate);
-        sb.append("SpO2: ").append(this.spO2);
-        sb.append("Status2: ").append(this.status2.toString());
+        sb.append("\nHeart Rate: ").append(this.heartRate);
+        sb.append("\nSpO2: ").append(this.spO2);
+        sb.append("\nStatus2: ").append(this.status2.toString());
         return sb.toString();
     }
 }

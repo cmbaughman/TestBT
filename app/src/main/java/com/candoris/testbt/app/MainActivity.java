@@ -66,6 +66,8 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     public TextView outOx;
     public TextView lblOx;
     public Button btnGetDateTime;
+    public Button btnSetDateTime;
+    public Button btnGetModel;
     public BTView btView;
 
     // SPP UUID service
@@ -88,6 +90,8 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         outOx = (TextView)findViewById(R.id.outOx);
         lblOx = (TextView)findViewById(R.id.lblOx);
         btnGetDateTime = (Button)findViewById(R.id.btnGetDateTime);
+        btnSetDateTime = (Button)findViewById(R.id.btnSetDateTime);
+        btnGetModel = (Button)findViewById(R.id.btnGetModel);
 
         btView.initialize(this);
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
@@ -125,7 +129,23 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             @Override
             public void onClick(View v) {
                 // This command gets date/time from the 3150
-                send(Pulse.CMDDATIME);
+                send(Pulse.CMDGETDATIME);
+            }
+        });
+
+        btnSetDateTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                byte[] dbytes = Pulse.CMDSETDATIME();
+                Log.e(TAG, "The date is: " + Utils.bytes2String(dbytes, dbytes.length));
+                send(Pulse.CMDSETDATIME());
+            }
+        });
+
+        btnGetModel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                send(Pulse.CMDGETMODEL);
             }
         });
     }
@@ -210,9 +230,19 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         }
     }
 
+    public void write(byte[] buffer, int length) {
+        try {
+            mByteQueue.write(buffer, 0, length);
+        }
+        catch (InterruptedException e) {
+            Log.e(TAG, "write() error " + e.getMessage(), e);
+        }
+        mHandler.sendMessage( mHandler.obtainMessage(UPDATE));
+    }
+
     private void checkBTState() {
         // Check Bluetooth turned on
-        btAdapter=BluetoothAdapter.getDefaultAdapter(); // CHECK THIS OUT THAT IT WORKS!!!
+        btAdapter=BluetoothAdapter.getDefaultAdapter();
         if(btAdapter==null) {
             Toast.makeText(getBaseContext(), "Device does not support Bluetooth", Toast.LENGTH_SHORT).show();
         } else {
@@ -248,6 +278,9 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                     switch (msg.arg1) {
                         case BluetoothSerialService.STATE_CONNECTED:
                             setTitle("Connected to " + mConnectedDeviceName);
+                            // Send initial command sequence for data format #8
+                            outp.append("\nConnected. Sending initial data command. ");
+                            mSerialService.write(Pulse.CMDSETCONFIG);
                             break;
 
                         case BluetoothSerialService.STATE_CONNECTING:
@@ -276,6 +309,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                     break;
                 case MESSAGE_WRITE:
                     byte[] writeBuff = (byte[])msg.obj;
+
                     btView.write(writeBuff, msg.arg1);
                     textChanged(writeBuff, msg.arg1);
                     break;
