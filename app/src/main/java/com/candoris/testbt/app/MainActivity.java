@@ -16,6 +16,8 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +65,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     public TextView outPulse;
     public TextView outOx;
     public TextView lblOx;
+    public Button btnGetDateTime;
     public BTView btView;
 
     // SPP UUID service
@@ -84,6 +87,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         outPulse = (TextView)findViewById(R.id.outPulse);
         outOx = (TextView)findViewById(R.id.outOx);
         lblOx = (TextView)findViewById(R.id.lblOx);
+        btnGetDateTime = (Button)findViewById(R.id.btnGetDateTime);
 
         btView.initialize(this);
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
@@ -116,6 +120,14 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             outp.append("\n Connecting to " + mDevice.getAddress() + "*****************");
             mSerialService = new BluetoothSerialService(this, mHandler, btView);
         }
+
+        btnGetDateTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // This command gets date/time from the 3150
+                send(Pulse.CMDDATIME);
+            }
+        });
     }
 
     @Override

@@ -14,6 +14,12 @@ public class Pulse {
 
     public static final byte msgStart = (byte)0x02;
     public static final byte msgEnd = (byte)0x03;
+    // ACK=good NAK=bad
+    public static final byte ACK = (byte)0x06;
+    public static final byte NAK = (byte)0x15;
+
+    public static final byte[] CMDDATIME = { (byte)0x02, (byte)0x72, (byte)0x00, (byte)0x03 };
+
 
     public static OxStatus getOxStatus(BitSet bitSet) {
         OxStatus oxStatus = new OxStatus();

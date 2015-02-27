@@ -6,6 +6,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.BitSet;
@@ -15,7 +17,7 @@ import java.util.BitSet;
  */
 public class Utils {
 
-    public static final String TAG = "Utils";
+    public static final String TAG = "Pulse - Utils";
 
     public static void log(String message) {
         if (message != null)
@@ -61,6 +63,7 @@ public class Utils {
         for (int i=0; i < count; i++) {
             String thaInt = Integer.toString((int)(b[i] & 0xFF));
             ret.append(thaInt);
+            ret.append(" ");
         }
 
         return ret.toString();
@@ -82,6 +85,31 @@ public class Utils {
             log("toHex StringIndexOutOfBoundsException: " + e.getMessage());
         }
         return result;
+    }
+
+    public static byte[] getBytesFromInputStream(InputStream inputStream) {
+        int leng = 0;
+        byte[] bytes = null;
+        try {
+            leng = inputStream.available();
+            bytes = new byte[(int)leng];
+
+            int offSet = 0;
+            int numRead = 0;
+
+            while (offSet < bytes.length && (numRead=inputStream.read(bytes, offSet, bytes.length-offSet)) >= 0) {
+                offSet += numRead;
+            }
+
+            if (offSet < bytes.length) {
+                throw new IOException("Could not completely read inputStream!");
+            }
+        }
+        catch (IOException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+
+        return bytes;
     }
 
     public static byte[] concat(byte[] A, byte[] B) {

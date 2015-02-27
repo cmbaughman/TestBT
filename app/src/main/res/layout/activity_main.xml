@@ -1,8 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
-                android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
                 tools:context=".MainActivity">
 
     <TextView
@@ -11,37 +14,64 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="15sp"
-            android:text="@string/label_pulse" android:textIsSelectable="false"/>
+            android:text="@string/label_pulse"
+            android:textIsSelectable="false"/>
     <TextView
             android:id="@+id/outPulse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:textSize="18sp"/>
+            android:text="X"
+            android:textSize="18sp" 
+            android:layout_toEndOf="@id/lblPulse" 
+            android:layout_marginLeft="21dp"/>
 
     <TextView
             android:id="@+id/lblOx"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/lblPulse"
             android:textSize="15sp"
-            android:text="@string/label_oxygen" android:textStyle="bold"/>
+            android:text="@string/label_oxygen"
+            android:textStyle="bold" 
+            android:layout_marginTop="20dp"/>
     <TextView
             android:id="@+id/outOx"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="X"
             android:textStyle="bold"
-            android:textSize="18sp"/>
-
-    <TextView
-            android:id="@+id/outp"
-            android:layout_width="wrap_content"
+            android:textSize="18sp"
+            android:layout_alignBaseline="@+id/lblOx" 
+            android:layout_toEndOf="@id/lblOx"
+            android:layout_marginLeft="52dp"/>
+    
+    <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"/>
+            android:id="@+id/btnGetDateTime"
+            android:text="Get Date From Oximeter"
+            android:layout_below="@+id/lblOx"
+            android:layout_marginTop="50dp"/>
+
+    <ScrollView
+            android:id="@+id/scrollOutp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/btnGetDateTime">
+        <TextView
+                android:id="@+id/outp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="X"
+                android:scrollbars="vertical"
+                android:layout_marginTop="40dp"/>
+    </ScrollView>
 
     <com.candoris.testbt.app.BTView
             android:id="@+id/btView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/scrollOutp"
             android:textSize="15sp"/>
 
-</LinearLayout>
+</RelativeLayout>

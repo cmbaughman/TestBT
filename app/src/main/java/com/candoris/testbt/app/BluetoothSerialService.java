@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import com.google.common.io.ByteStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -297,48 +298,61 @@ public class BluetoothSerialService {
             StringBuilder stringBuilder = null;
             BitSet bitSet = null;
             OxRecord oxRecord = null;
-            byte[] buffer = new byte[4];
+            byte[] buffer = null;
             int begin = 0;
             int bytes = 0;
             while (true) {
                 try {
-                    bytes = mmInStream.read(buffer);
-                    mTextView.append(buffer, bytes, buffer.length);
-                    Log.e(TAG, "RECEIVED RAW: " + buffer);
+                    buffer = ByteStreams.toByteArray((mmInStream));
+
+                    Log.e(TAG, "RECEIVED length: " + buffer.length + " + Guava: " + buffer);
                     Log.e(TAG, "RECEIVED var bytes: " + Utils.bytes2String(buffer, bytes));
+
                     stringBuilder = new StringBuilder();
                     oxRecord = new OxRecord();
 
                     for (int i=begin; i < bytes; i++) {
                         stringBuilder.append(buffer[i]);
                         stringBuilder.append(" ");
-                        switch (i) {
-                            case 0:
-                                //Status
-                                bitSet = Utils.parseByte(buffer[i]);
-                                oxRecord.setStatus(Pulse.getOxStatus(bitSet));
-                                break;
-                            case 1:
-                                // Pulse
-                                oxRecord.setHeartRate(Integer.toString(buffer[i]));
-                                break;
-                            case 2:
-                                // SpO2
-                                oxRecord.setSpO2(Integer.toString(buffer[i]));
-                                break;
-                            case 3:
-                                // Status2
-                                bitSet = Utils.parseByte(buffer[i]);
-                                oxRecord.setStatus2(Pulse.getOxStatus2(bitSet));
-                                break;
-                            default:
-                                Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
-                                break;
+
+                        if (bytes == 10) {
+                            Log.e(TAG, "********************** Got the 10 byte Date back! ******************");
+                        }
+
+                        if (bytes == 4) {
+                            Log.e(TAG, "********* 4 Bytes so it is a RT OxRecord Type ******************");
+                            switch (i) {
+                                case 0:
+                                    //Status
+                                    bitSet = Utils.parseByte(buffer[i]);
+                                    oxRecord.setStatus(Pulse.getOxStatus(bitSet));
+                                    break;
+                                case 1:
+                                    // Pulse
+                                    oxRecord.setHeartRate(Integer.toString(buffer[i]));
+                                    break;
+                                case 2:
+                                    // SpO2
+                                    oxRecord.setSpO2(Integer.toString(buffer[i]));
+                                    break;
+                                case 3:
+                                    // Status2
+                                    bitSet = Utils.parseByte(buffer[i]);
+                                    oxRecord.setStatus2(Pulse.getOxStatus2(bitSet));
+                                    break;
+                                default:
+                                    Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
+                                    break;
+                            }
                         }
                     }
                     Log.e(TAG, "RECEIVED parsed: " + stringBuilder.toString());
-                    Log.e(TAG, "OxRecord: " + oxRecord.toString());
-                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, 8, -1, oxRecord).sendToTarget();
+                    // This is a quick hack i will fix when I get these into a new method
+                    if (bytes == 4) {
+                        Log.e(TAG, "OxRecord: " + oxRecord.toString());
+                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, 8, -1, oxRecord).sendToTarget();
+                    }
+
                 }
                 catch (IOException e) {
                     Log.e("TestBTConnectedThread", e.getMessage(), e);
@@ -351,7 +365,8 @@ public class BluetoothSerialService {
         public void write(byte[] bytes) {
             try {
                 mmOutStream.write(bytes);
-                Log.e(TAG, "Calling write");
+                Log.e(TAG, "*********** Calling write ****************");
+                Log.e(TAG, "WRITING: " + Utils.bytes2String(bytes, bytes.length) + " ****************");
                 mHandler.obtainMessage(MainActivity.MESSAGE_WRITE, bytes.length, -1, bytes)
                         .sendToTarget();
             }
