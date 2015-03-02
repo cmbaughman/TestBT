@@ -101,13 +101,11 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         btAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
 
-        Log.e(TAG, pairedDevices.size() + " PAIRED FOUND ******************");
         outp.append("\nConnecting .....");
 
         if (pairedDevices.size() > 0) {
             for(BluetoothDevice device : pairedDevices) {
 
-                Log.e(TAG, "Found " + device.getName() + " ***** " + device.getAddress());
                 outp.append("\nFound " + device.getName() + " ***** " + device.getAddress());
 
                 if (device.getName().contains(btname)) {
@@ -120,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
 
         if (mDevice != null) {
             Log.e(TAG, "DEVICE NOT NULL " + address + " in onCreate()");
-            outp.append("\n Connecting to " + mDevice.getAddress() + "*****************");
+            outp.append("\n Connecting to " + mDevice.getAddress());
             mSerialService = new BluetoothSerialService(this, mHandler);
         }
 
@@ -174,7 +172,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             if (mSerialService != null) {
                 if (mSerialService.getState() == BluetoothSerialService.STATE_NONE) {
                     mSerialService.start();
-                    Log.d(TAG, "STARTED SERVICE ");
+                    Log.d(TAG, "STARTED BluetoothSerialService ");
                     mSerialService.connect(mDevice);
                 }
             }
@@ -361,16 +359,12 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:

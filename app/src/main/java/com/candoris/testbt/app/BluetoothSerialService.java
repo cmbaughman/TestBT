@@ -24,14 +24,12 @@ public class BluetoothSerialService {
     private static final String TAG = "Pulse BluetoothReadService";
     private static final boolean D = true;
 
-    // Member fields
     private final BluetoothAdapter btAdapter;
     private final Handler mHandler;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
     private boolean mAllowInsecureConnections;
-    private ITextEvents listener;
     private Context mContext;
 
     // Constants for WristOx2 Connection state machine
@@ -287,7 +285,7 @@ public class BluetoothSerialService {
          *
          */
         public void run() {
-            Log.d(TAG, "BEGIN ConnectedThread");
+            if (D) Log.d(TAG, "BEGIN ConnectedThread");
             StringBuilder stringBuilder = null;
             BitSet bitSet = null;
             OxRecord oxRecord = null;
@@ -305,7 +303,7 @@ public class BluetoothSerialService {
                     for (int i=begin; i < bytes; i++) {
                         stringBuilder.append(buffer[i]);
                         stringBuilder.append(" ");
-                        Log.e(TAG, "Number of bytes received: " + bytes);
+                        Log.e(TAG, "Total bytes received: " + bytes);
                         if (bytes == 1) {
                             Log.e(TAG, "1 bytes received " + buffer[i]);
                         }
@@ -372,10 +370,13 @@ public class BluetoothSerialService {
         }
 
         public void write(byte[] bytes) {
-            try {
-                mmOutStream.write(bytes);
+            if (D) {
                 Log.e(TAG, "*********** Calling write ****************");
                 Log.e(TAG, "WRITING: " + Utils.bytes2String(bytes, bytes.length) + " ****************");
+            }
+
+            try {
+                mmOutStream.write(bytes);
                 mHandler.obtainMessage(MainActivity.MESSAGE_WRITE, bytes.length, -1, bytes)
                         .sendToTarget();
             }

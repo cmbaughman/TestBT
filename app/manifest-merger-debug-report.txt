@@ -49,6 +49,16 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:19:17
 	android:name
 		ADDED from AndroidManifest.xml:19:27
+activity#com.candoris.testbt.app.DeviceListActivity
+ADDED from AndroidManifest.xml:22:9
+	android:label
+		ADDED from AndroidManifest.xml:23:19
+	android:configChanges
+		ADDED from AndroidManifest.xml:25:19
+	android:theme
+		ADDED from AndroidManifest.xml:24:19
+	android:name
+		ADDED from AndroidManifest.xml:22:19
 uses-sdk
 INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
 MERGED from com.android.support:appcompat-v7:21.0.3:15:5
