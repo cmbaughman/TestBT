@@ -69,7 +69,6 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     public Button btnSetDateTime;
     public Button btnGetModel;
     public Button btnPlayBack;
-    public BTView btView;
 
     // SPP UUID service
     //private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -86,7 +85,6 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         setContentView(R.layout.activity_main);
 
         outp = (TextView)findViewById(R.id.outp);
-        btView = (BTView)findViewById(R.id.btView);
         outPulse = (TextView)findViewById(R.id.outPulse);
         outOx = (TextView)findViewById(R.id.outOx);
         lblOx = (TextView)findViewById(R.id.lblOx);
@@ -95,7 +93,6 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         btnGetModel = (Button)findViewById(R.id.btnGetModel);
         btnPlayBack = (Button)findViewById(R.id.btnPlayBack);
 
-        btView.initialize(this);
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
         outp.setMovementMethod(new ScrollingMovementMethod());
 
@@ -124,7 +121,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         if (mDevice != null) {
             Log.e(TAG, "DEVICE NOT NULL " + address + " in onCreate()");
             outp.append("\n Connecting to " + mDevice.getAddress() + "*****************");
-            mSerialService = new BluetoothSerialService(this, mHandler, btView);
+            mSerialService = new BluetoothSerialService(this, mHandler);
         }
 
         btnGetDateTime.setOnClickListener(new View.OnClickListener() {
@@ -182,7 +179,6 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                 }
             }
         }
-        btView.onResume();
     }
 
     @Override
@@ -319,7 +315,6 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                 case MESSAGE_WRITE:
                     byte[] writeBuff = (byte[])msg.obj;
 
-                    btView.write(writeBuff, msg.arg1);
                     textChanged(writeBuff, msg.arg1);
                     break;
                 case MESSAGE_DEVICE_NAME:

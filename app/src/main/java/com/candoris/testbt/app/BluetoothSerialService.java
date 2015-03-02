@@ -30,10 +30,7 @@ public class BluetoothSerialService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-
     private boolean mAllowInsecureConnections;
-
-    private BTView mTextView;
     private ITextEvents listener;
     private Context mContext;
 
@@ -43,11 +40,10 @@ public class BluetoothSerialService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
-    public BluetoothSerialService(Context context, Handler handler, BTView textView) {
+    public BluetoothSerialService(Context context, Handler handler) {
         btAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
-        mTextView = textView;
         mContext = context;
         mAllowInsecureConnections = true;
     }
