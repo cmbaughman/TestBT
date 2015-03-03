@@ -6,7 +6,8 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                tools:context=".MainActivity">
+                tools:context=".MainActivity"
+                android:scrollbars="vertical">
 
     <TextView
             android:id="@+id/lblPulse"
@@ -74,11 +75,47 @@
             android:layout_below="@+id/btnGetModel"
             android:layout_marginTop="10dp"/>
 
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnGetCfg"
+            android:text="Get Config"
+            android:layout_below="@+id/btnPlayBack"
+            android:layout_marginTop="10dp"/>
+
+    <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/scrollDate"
+            android:layout_below="@+id/btnGetCfg">
+
+        <TextView
+                android:id="@+id/outModel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="x"
+                android:layout_marginTop="10dp"/>
+
+    </ScrollView>
+
+    <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/scrollModel"
+            android:layout_below="@+id/scrollDate">
+
+        <TextView
+                android:id="@+id/outDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="x"
+                android:layout_marginTop="10dp"/>
+    </ScrollView>
+
     <ScrollView
             android:id="@+id/scrollOutp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/btnPlayBack">
+            android:layout_below="@+id/scrollModel">
 
         <TextView
                 android:id="@+id/outp"
@@ -86,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:text="X"
                 android:scrollbars="vertical"
-                android:layout_marginTop="40dp"/>
+                android:layout_marginTop="10dp"/>
     </ScrollView>
 
 </RelativeLayout>

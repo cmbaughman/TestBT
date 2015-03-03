@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -339,8 +340,9 @@ public class BluetoothSerialService {
                             }
                         }
 
-                        if (bytes > 30) { // Device is in playback mode
-                            Log.e(TAG, Utils.bytes2String(buffer, bytes));
+                        if (bytes > 132) {
+                            // Config
+                            OxConfig oxConfig = OxConfig.createOxConfig(buffer, bytes);
                         }
                     }
 
@@ -358,6 +360,63 @@ public class BluetoothSerialService {
                     if (bytes == 11) {
                         Log.e(TAG, "********************** Got the 11 byte model back! ******************");
                         Log.e(TAG, "*****Version Call returned " + Pulse.getVersion(buffer));
+                    }
+
+                    if (bytes >= 15) { // Device is in playback mode
+                        int segInt = 0;
+                        int seg2 = 0;
+                        byte[] modl = null;
+                        byte[] dt = null;
+                        OxHeader header = new OxHeader();
+
+                        for (int iter=0; iter < bytes; iter++) {
+                            // Check first byte for CP mode response
+                            if (buffer[iter] == Pulse.ACK) {
+                                Log.e(TAG, "Received ACK**********************");
+                            }
+                            else if (buffer[iter] == Pulse.NAK) {
+                                Log.e(TAG, "Received NAK*********************");
+                            }
+
+                            if (buffer[iter] == Pulse.CR){
+                                Log.e(TAG, "Received CR*********************");
+                            }
+                            else if (buffer[iter] == Pulse.LF){
+                                Log.e(TAG, "Received LF*********************");
+
+                                for (int j = iter+1; j < bytes; j++) {
+                                    if (buffer[j] == Pulse.CR && buffer[j+1] == Pulse.LF) {
+                                        if (segInt == 0) {
+                                            segInt = j+2;
+                                            Log.e(TAG, "Iter: " + iter+1 + " j: " + segInt);
+                                            modl = Arrays.copyOfRange(buffer, iter+1, segInt);
+                                        }
+                                        else if (seg2 == 0) {
+                                            seg2 = j+2;
+                                            Log.e(TAG, "Iter: " + segInt+1 + " j: " + seg2);
+                                            dt = Arrays.copyOfRange(buffer, segInt+1, seg2);
+                                            break;
+                                        }
+                                        else {
+                                            header.setModelNumber(new String(modl, 0, modl.length));
+                                            header.setCurrentDate(new String(dt, 0, dt.length));
+                                        }
+                                    }
+                                }
+
+                                if (header.getCurrentDate() != null && header.getModelNumber() != null) {
+                                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, 15, -1, header).sendToTarget();
+                                    break;
+                                }
+                            }
+                            else {
+                                Log.e(TAG, "Received " + new String(new byte[]{buffer[iter]}));
+                            }
+
+                        }
+
+                        Log.e(TAG, "AS STRING: " + new String(buffer, 0, bytes));
+                        Log.e(TAG, Utils.bytes2String(buffer, bytes));
                     }
 
                 }

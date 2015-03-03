@@ -65,10 +65,13 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     public TextView outPulse;
     public TextView outOx;
     public TextView lblOx;
+    public TextView outModel;
+    public TextView outDate;
     public Button btnGetDateTime;
     public Button btnSetDateTime;
     public Button btnGetModel;
     public Button btnPlayBack;
+    public Button btnGetConfig;
 
     // SPP UUID service
     //private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -88,10 +91,13 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         outPulse = (TextView)findViewById(R.id.outPulse);
         outOx = (TextView)findViewById(R.id.outOx);
         lblOx = (TextView)findViewById(R.id.lblOx);
+        outDate = (TextView)findViewById(R.id.outDate);
+        outModel = (TextView)findViewById(R.id.outModel);
         btnGetDateTime = (Button)findViewById(R.id.btnGetDateTime);
         btnSetDateTime = (Button)findViewById(R.id.btnSetDateTime);
         btnGetModel = (Button)findViewById(R.id.btnGetModel);
         btnPlayBack = (Button)findViewById(R.id.btnPlayBack);
+        btnGetConfig = (Button)findViewById(R.id.btnGetCfg);
 
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
         outp.setMovementMethod(new ScrollingMovementMethod());
@@ -126,7 +132,9 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             @Override
             public void onClick(View v) {
                 // This command gets date/time from the 3150
-                send(Pulse.CMDGETDATIME);
+                //send(Pulse.CMDGETDATIME);
+                // NOTE: If level 2 command takes too long use the above instead.
+                send(Pulse.CMDHDR.getBytes());
             }
         });
 
@@ -150,6 +158,13 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             @Override
             public void onClick(View v) {
                 send(Pulse.CMDMPC.getBytes());
+            }
+        });
+
+        btnGetConfig.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                send(Pulse.CMDCFG.getBytes());
             }
         });
     }
@@ -304,6 +319,12 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                         outPulse.setText(oxRecord.getHeartRate());
                         outOx.setText(oxRecord.getSpO2());
                         outp.append("\n" + oxRecord.toString());
+                    }
+                    else if (msg.arg1 == 15) {
+                        // Level 2 Get Model
+                        OxHeader header = (OxHeader)msg.obj;
+                        outModel.setText(header.getModelNumber());
+                        outDate.setText(header.getCurrentDate());
                     }
                     else {
                         Log.e(TAG, "MESSAGE_READ: " + msg.obj);

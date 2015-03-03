@@ -1,7 +1,9 @@
 package com.candoris.testbt.app;
 
+import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -29,16 +31,9 @@ public class Pulse {
     // Set Date Time on the 3150
     public static byte[] CMDSETDATIME() {
         Calendar calendar = Calendar.getInstance();
-        byte yr = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.YEAR)), 16);
-        byte mo = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.MONTH)+1), 16);
-        byte day = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)), 16);
-        byte hour = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), 16);
-        byte min = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.MINUTE)), 16);
-        byte sec = (byte)Integer.parseInt(String.valueOf(calendar.get(Calendar.SECOND)), 16);
-
-        byte[] tmp = { (byte)0x02, (byte)0x72, (byte)0x06, yr, mo, day, hour, min, sec, (byte)0x03 };
-
-        return tmp;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
+        String ret = "DTM" + sdf.format(new Date());
+        return ret.getBytes();
     }
     // Set data format and activate (DF8)
     public static final byte[] CMDSETCONFIG = { (byte)0x44, (byte)0x38 };
@@ -50,6 +45,12 @@ public class Pulse {
     // Level 2 COMMANDS
     // Memory playback
     public static final String CMDMPC = "MPC?" + CR + LF;
+    // Level 2 DateTime
+    public static final String CMDDTM = "DTM?" + CR + LF;
+    // Level 2 Get Header
+    public static final String CMDHDR = "HDR?" + CR + LF;
+    // Level 2 Playback Configuration
+    public static final String CMDCFG = "CFG?" + CR + LF;
 
 
     public static OxStatus getOxStatus(BitSet bitSet) {
