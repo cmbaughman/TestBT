@@ -132,9 +132,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
             @Override
             public void onClick(View v) {
                 // This command gets date/time from the 3150
-                //send(Pulse.CMDGETDATIME);
-                // NOTE: If level 2 command takes too long use the above instead.
-                send(Pulse.CMDHDR.getBytes());
+                send(Pulse.CMDGETDATIME);
             }
         });
 
@@ -150,7 +148,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         btnGetModel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                send(Pulse.CMDGETMODEL);
+                send(Pulse.CMDHDR.getBytes());
             }
         });
 

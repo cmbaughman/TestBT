@@ -1,5 +1,7 @@
 package com.candoris.testbt.app;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -31,9 +33,25 @@ public class Pulse {
     // Set Date Time on the 3150
     public static byte[] CMDSETDATIME() {
         Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy");
+        byte yr = (byte)(Integer.parseInt(Integer.toHexString(Integer.parseInt(simpleDateFormat.format(new Date()))),
+                16) & 0xff);
+        byte mo = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.MONTH)), 16) & 0xff);
+        byte day = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)), 16) & 0xff);
+        byte hour = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), 16) & 0xff);
+        byte min = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.MINUTE)), 16) & 0xff);
+        byte sec = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.SECOND)), 16) & 0xff);
+
+        byte[] tmp = { (byte)0x02, (byte)0x72, (byte)0x06, yr, mo, day, hour, min, sec, (byte)0x03 };
+        return tmp;
+    }
+    // Level 2 command
+    public static byte[] CMDSETDATIME2() {
+        Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
         String ret = "DTM" + sdf.format(new Date());
-        return ret.getBytes();
+        Log.e("PULSE", "CMDSETDATETIME: " + ret);
+        return ret.getBytes(); // 150305101634
     }
     // Set data format and activate (DF8)
     public static final byte[] CMDSETCONFIG = { (byte)0x44, (byte)0x38 };

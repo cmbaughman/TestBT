@@ -92,7 +92,7 @@
                 android:id="@+id/outModel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="x"
+                android:text=""
                 android:layout_marginTop="10dp"/>
 
     </ScrollView>
@@ -107,7 +107,7 @@
                 android:id="@+id/outDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="x"
+                android:text=""
                 android:layout_marginTop="10dp"/>
     </ScrollView>
 
@@ -121,7 +121,7 @@
                 android:id="@+id/outp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="X"
+                android:text=""
                 android:scrollbars="vertical"
                 android:layout_marginTop="10dp"/>
     </ScrollView>
