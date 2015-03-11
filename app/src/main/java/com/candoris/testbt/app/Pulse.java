@@ -34,8 +34,8 @@ public class Pulse {
     public static byte[] CMDSETDATIME() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy");
-        byte yr = (byte)(Integer.parseInt(Integer.toHexString(Integer.parseInt(simpleDateFormat.format(new Date()))),
-                16) & 0xff);
+        byte yr = (byte)(Integer.parseInt(Integer.toHexString(
+                        Integer.parseInt(simpleDateFormat.format(new Date()))), 16) & 0xff);
         byte mo = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.MONTH)), 16) & 0xff);
         byte day = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)), 16) & 0xff);
         byte hour = (byte)(Integer.parseInt(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), 16) & 0xff);
@@ -51,18 +51,21 @@ public class Pulse {
         SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
         String ret = "DTM" + sdf.format(new Date());
         Log.e("PULSE", "CMDSETDATETIME: " + ret);
-        return ret.getBytes(); // 150305101634
+        return ret.getBytes();
     }
     // Set data format and activate (DF8)
-    public static final byte[] CMDSETCONFIG = { (byte)0x44, (byte)0x38 };
+    public static final byte[] CMDSETDF = { (byte)0x44, (byte)0x38 };
+    public static final byte[] CMDSETDFCHECK = { (byte)0x44, (byte)0x44 };
     // Enable ATR and set data format (DF13)
-    public static final byte[] CMDSETCONFIG13 =
+    public static final byte[] CMDSETDF13 =
             { (byte)0x02, (byte)0x70,  (byte)0x04, (byte)0x02, (byte)0x0D, (byte)0x01, (byte)0x84, (byte)0x03};
+
     // Get Model Version info from the 3150
     public static final byte[] CMDGETMODEL = { (byte)0x02, (byte)0x74, (byte)0x02, (byte)0x05, (byte)0x05, (byte)0x03 };
+
     // Level 2 COMMANDS
     // Memory playback
-    public static final String CMDMPC = "MPC?" + CR + LF;
+    public static final String CMDMPC = "MPB?" + CR + LF;
     // Level 2 DateTime
     public static final String CMDDTM = "DTM?" + CR + LF;
     // Level 2 Get Header

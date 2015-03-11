@@ -2,6 +2,7 @@ package com.candoris.testbt.app;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
@@ -22,11 +23,12 @@ import java.util.UUID;
  */
 public class BluetoothSerialService {
 
-    private static final String TAG = "Pulse BluetoothReadService";
+    private static final String TAG = "Pulse BluetoothService";
     private static final boolean D = true;
 
     private final BluetoothAdapter btAdapter;
     private final Handler mHandler;
+    private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
@@ -75,7 +77,12 @@ public class BluetoothSerialService {
             mConnectedThread = null;
         }
 
-        setState(STATE_NONE);
+        setState(STATE_LISTEN);
+
+        if(mAcceptThread ==null) {
+            mAcceptThread = new AcceptThread();
+            mAcceptThread.start();
+        }
     }
 
     // Starts connect thread
@@ -99,6 +106,11 @@ public class BluetoothSerialService {
     // starts connected thread, begins managing connection
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
         if (D) Log.d(TAG, "connected");
+
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
+        }
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -138,6 +150,11 @@ public class BluetoothSerialService {
         if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
+        }
+
+        if(mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
         }
 
         setState(STATE_NONE);
@@ -315,35 +332,42 @@ public class BluetoothSerialService {
 
                         if (bytes == 4) {
                             Log.e(TAG, "********* 4 Bytes so it is a RT OxRecord Type ******************");
-                            switch (i) {
-                                case 0:
-                                    //Status
-                                    bitSet = Utils.parseByte(buffer[i]);
-                                    oxRecord.setStatus(Pulse.getOxStatus(bitSet));
-                                    break;
-                                case 1:
-                                    // Pulse
-                                    oxRecord.setHeartRate(Integer.toString(buffer[i]));
-                                    break;
-                                case 2:
-                                    // SpO2
-                                    oxRecord.setSpO2(Integer.toString(buffer[i]));
-                                    break;
-                                case 3:
-                                    // Status2
-                                    bitSet = Utils.parseByte(buffer[i]);
-                                    oxRecord.setStatus2(Pulse.getOxStatus2(bitSet));
-                                    break;
-                                default:
-                                    Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
-                                    break;
+                            try {
+                                switch (i) {
+                                    case 0:
+                                        //Status
+                                        bitSet = Utils.parseByte(buffer[i]);
+                                        oxRecord.setStatus(Pulse.getOxStatus(bitSet));
+                                        break;
+                                    case 1:
+                                        // Pulse
+                                        oxRecord.setHeartRate(Integer.toString(buffer[i]));
+                                        break;
+                                    case 2:
+                                        // SpO2
+                                        oxRecord.setSpO2(Integer.toString(buffer[i]));
+                                        break;
+                                    case 3:
+                                        // Status2
+                                        bitSet = Utils.parseByte(buffer[i]);
+                                        oxRecord.setStatus2(Pulse.getOxStatus2(bitSet));
+                                        break;
+                                    default:
+                                        Log.e(TAG, "Unhandled value i=" + i + " : " + buffer[i]);
+                                        break;
+                                }
+                            }
+                            catch(Exception e) {
+                                Log.e(TAG, "Caught exception " + e.getMessage(), e);
                             }
                         }
 
+                        /*
                         if (bytes > 132) {
                             // Config
                             OxConfig oxConfig = OxConfig.createOxConfig(buffer, bytes);
                         }
+                        */
                     }
 
                     // This is a quick hack i will fix when I get these into a new method
@@ -416,7 +440,7 @@ public class BluetoothSerialService {
                         }
 
                         Log.e(TAG, "AS STRING: " + new String(buffer, 0, bytes));
-                        Log.e(TAG, Utils.bytes2String(buffer, bytes));
+                        Log.e(TAG, "AS Utils.bytes2String() " + Utils.bytes2String(buffer, bytes));
                     }
 
                 }
@@ -440,7 +464,7 @@ public class BluetoothSerialService {
                         .sendToTarget();
             }
             catch (IOException e) {
-                Log.e("Error occured during write", e.getMessage(), e);
+                Log.e(TAG, e.getMessage(), e);
             }
         }
 
@@ -450,6 +474,66 @@ public class BluetoothSerialService {
             }
             catch (IOException e) {
                 Log.e("TestBTConnectedThread", e.getMessage(), e);
+            }
+        }
+    }
+
+    private class AcceptThread extends Thread {
+        private final BluetoothServerSocket mServerSocket;
+        public static final String SDP_NAME = "NoninService";
+
+        public AcceptThread() {
+            BluetoothServerSocket tmp = null;
+
+            try {
+                tmp = btAdapter.listenUsingRfcommWithServiceRecord(SDP_NAME, Pulse.BTMODULEUUID);
+
+            }
+            catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+            mServerSocket = tmp;
+        }
+
+        public void run() {
+            BluetoothSocket socket = null;
+
+            while(mState != STATE_CONNECTED) {
+                try {
+                    socket = mServerSocket.accept();
+                }
+                catch (IOException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    break;
+                }
+
+                if (socket != null) {
+                    synchronized (BluetoothSerialService.this) {
+                        switch (mState) {
+                            case STATE_LISTEN:
+                            case STATE_CONNECTING:
+                                connected(socket, socket.getRemoteDevice());
+                                break;
+                            case STATE_NONE:
+                            case STATE_CONNECTED:
+                                try {
+                                    mServerSocket.close();
+                                }
+                                catch (IOException e) { break; }
+                                break;
+                        }
+                    }
+                }
+            }
+            Log.i(TAG, "AcceptThread Listener activated.");
+        }
+
+        public void cancel() {
+            try {
+                mServerSocket.close();
+            }
+            catch (IOException e) {
+                Log.e(TAG, "Couldnt close mServerSocket ", e);
             }
         }
     }

@@ -22,6 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends ActionBarActivity implements ITextEvents {
@@ -79,6 +82,13 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
     private static final String address = "00:1C:05:00:B1:0B";
     private static final String btname = "Nonin";
 
+    // NOTE: These is for recording OxRecords
+    private static final boolean RECORD_ON = true;
+    OxDataSource dataSource = null;
+    Date dateStartedRecording = new Date();
+    Date recorded = null;
+    // ******* End Recording props
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +111,14 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
 
         lblOx.setText(Html.fromHtml("SpO<sup>2</sup>"));
         outp.setMovementMethod(new ScrollingMovementMethod());
+
+        // remove this
+        OxRecord ot = new OxRecord();
+        ot.setHeartRate("100");
+        ot.setSpO2("101");
+        saveOxRecord(ot);
+        List<OxRecord> tst = dataSource.getAllOxRecords();
+        outp.append("\n\n WORKS!!! " + tst.get(0).getId() + " \n\n");
 
         checkBTState();
 
@@ -162,7 +180,8 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         btnGetConfig.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                send(Pulse.CMDCFG.getBytes());
+                //send(Pulse.CMDCFG.getBytes());
+                send(Pulse.CMDSETDF13);
             }
         });
     }
@@ -200,6 +219,8 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
         if (mSerialService != null) {
             mSerialService.stop();
         }
+
+        dataSource.close();
     }
 
     public int getConnectionState() {
@@ -296,7 +317,7 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                             setTitle("Connected to " + mConnectedDeviceName);
                             // Send initial command sequence for data format #8
                             outp.append("\nConnected. Sending initial data command. ");
-                            mSerialService.write(Pulse.CMDSETCONFIG);
+                            mSerialService.write(Pulse.CMDSETDF);
                             break;
 
                         case BluetoothSerialService.STATE_CONNECTING:
@@ -317,6 +338,9 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                         outPulse.setText(oxRecord.getHeartRate());
                         outOx.setText(oxRecord.getSpO2());
                         outp.append("\n" + oxRecord.toString());
+
+                        // For recording measurements
+                        saveOxRecord(oxRecord);
                     }
                     else if (msg.arg1 == 15) {
                         // Level 2 Get Model
@@ -373,6 +397,23 @@ public class MainActivity extends ActionBarActivity implements ITextEvents {
                 if (resultCode != Activity.RESULT_OK) {
                     Log.d(TAG, "Bluetooth is not enabled");
                 }
+        }
+    }
+
+    public void saveOxRecord(OxRecord oxRec) {
+        if (dataSource == null) {
+            dataSource = new OxDataSource(this);
+
+            try {
+                dataSource.open();
+            }
+            catch (SQLException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+
+            recorded = new Date();
+            dataSource.createOxRecord(oxRec.getHeartRate(), oxRec.getSpO2(), dateStartedRecording, recorded);
+            Log.d(TAG, "Data recorded.");
         }
     }
 
